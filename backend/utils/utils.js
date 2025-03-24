@@ -24,6 +24,9 @@ const loginBody = [
 
 ]
 
+const otp =[
+  body("email").isString().withMessage("Email must be in texts").notEmpty().withMessage("Provide a mail address"),
+  body("otp").isString().withMessage("This is not a valid otp").notEmpty().withMessage("Provide OTP sent to mail")
+]
 
-
-module.exports = {registerUserBody, loginBody,registerDesignerBody}
+module.exports = {registerUserBody, loginBody,registerDesignerBody,otp}

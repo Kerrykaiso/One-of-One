@@ -14,7 +14,16 @@ const registerRateLimit = rateLimit({
     max:5,
     standardHeaders: true,
     legacyHeaders: true,
+    message: "Too many request, try again later",
     skipSuccessfulRequests:true
 })
 
-module.exports={loginRateLimit,registerRateLimit}
+const verifyOTPRateLimit = rateLimit({
+    windowMs:3*60*60*1000,
+    max:3,
+    standardHeaders: true,
+    legacyHeaders: true,
+    message: "Too many request, try again later",
+    skipSuccessfulRequests:true
+})
+module.exports={loginRateLimit,registerRateLimit,verifyOTPRateLimit}

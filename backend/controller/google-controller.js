@@ -15,10 +15,11 @@ const googleAuth = async(req,res,next)=>{
 
 const instantiateGoogle = (req,res,next)=>{
  const {role} = req.query
+ req.session.role = role
  if (!role || !["designer","customer"].includes(role)) {
     return res.status(400).json("No role provided")
  }
- passport.authenticate("google",{scope:["profile", "email"], state:role})(req,res,next)
+ passport.authenticate("google",{scope:["profile", "email"],prompt:"select_account"})(req,res,next)
 
 }
 

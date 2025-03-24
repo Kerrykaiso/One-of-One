@@ -1,8 +1,9 @@
-const {Designer} = require("../models")
+const {Designer,OTP} = require("../models")
 const AppError = require("../utils/appError")
 const bcrypt = require("bcryptjs")
 const uuid = require("uuid")
 const {signJwt} = require("../middlewares/jwt")
+const { generateOTP } = require("../utils/emailUtils")
 
 
 const registerDesignerService = async(data,next )=>{
@@ -13,7 +14,17 @@ const registerDesignerService = async(data,next )=>{
            const appError=  new AppError("User already exist", "failed", 400)
            throw appError
        }
-         const salt = await bcrypt.genSalt(10);
+       const salt = await bcrypt.genSalt(10);
+       const otp = generateOTP() //"54321" 
+       const hashOTP = await bcrypt.hash(otp,salt)
+       const timestamp = new Date()
+       const createOTP = await OTP.create({email,otp:hashOTP,timestamp})
+       if (!createOTP) {
+        const appError=  new AppError("error creating otp", "failed", 400)
+        throw appError
+       }
+       //send otp to email
+
          const hashPassword = await bcrypt.hash(password, salt)
          const id = uuid.v4()
          const saved = await Designer.create({ email: email, password: hashPassword, name,X,pinterest,instagram,id},);
@@ -32,6 +43,7 @@ const registerDesignerService = async(data,next )=>{
    
    const loginDesignerService= async(data,next)=>{
     try {
+      
        const {email, password}= data
        const findDesigner  = await Designer.findOne({where:{email}})
        if (!findDesigner) {

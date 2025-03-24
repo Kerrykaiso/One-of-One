@@ -1,3 +1,6 @@
+const { TimeSeriesBucketTimestamp } = require("redis");
+const OTP=require("./otp")
+
 module.exports = (sequelize, DataTypes) => {
     const Designer = sequelize.define('Designer', {
       id:{
@@ -7,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       password: {
         type: DataTypes.STRING,
@@ -39,6 +42,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true
       }
     });
-  
+   
     return Designer;
   };

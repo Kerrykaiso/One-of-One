@@ -9,68 +9,55 @@ passport.use(
     new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "",
+        callbackURL: "http://localhost:8000/auth/google/callback",
+        passReqToCallback: true,
     },
     async(req,accessToken, refreshToken, profile,done)=>{
         try {
-            const role = req.query.state
-            if (!role || !["designer", "customer"].includes(role)) {
-                const appError = new AppError("Google auth failed, provide role", "failed", 400)
-                throw appError 
-             }
-            const existingCustomer = await Customer.findOne({where:{email:profile.emails[0].value}})
-            const existingDesigner = await Designer.findOne({where:{email:profile.emails[0].value}})
-          
-            if (role==="customer" && !existingCustomer) {
-                const id = uuid().v4
-                const newCustomer =  await Customer.create({
-                    email: profile.emails[0].value,
-                    id,
-                    name: profile.displayName,
-                    role
-                })
-                const token = signJwt({
-                    email:profile.emails[0].value,
-                    role:role,
-                    id:id,
-                    name:profile.displayName
-
-                })
-                const user ={email:newCustomer.email,id:newCustomer.id,role:newCustomer.role,name:newCustomer.name}
-                return done(null,{user,token})
-
-            } else if (role==="designer" && !existingDesigner){
-
-                const id = uuid().v4
-                const newDesigner =  await Designer.create({
-                    email: profile.emails[0].value,
-                    id,
-                    name: profile.displayName,
-                    role
-                })
-                const token = signJwt({
-                    email:profile.emails[0].value,
-                    role:role,
-                    id:id,
-                    name:profile.displayName
-
-                })
-                const user ={email:newDesigner.email,id:newDesigner.id,role:newDesigner.role,name:newDesigner.name}
-                return done(null,{user,token})
-
-            } else {
-                const id = existingCustomer.id || existingDesigner.id
-                const role = existingCustomer.role || existingDesigner.role
-
-                const user ={
-                    name: profile.displayName,
-                    email: profile.emails[0].value,
-                    id,
-                    role
-                }
-                const token = signJwt(user)
-                return done(null,{user,token})
+            const role = req.session?.role
+           // console.log(`in strategy ${role}`)
+            if (!profile) {
+                return done(new AppError("profile is not defined","failed", 400),false)
             }
+            if (!role || !["designer", "customer"].includes(role)) {
+                    const appError = new AppError("Google auth failed, provide role", "failed", 400)
+                    throw appError 
+                 }
+                 const username = profile?.displayName || "kerry"
+            let existingUser =await (role==="customer" ? Customer.findOne({where:{email:profile.emails[0].value}}):
+            Designer.findOne({where:{email:profile.emails[0].value}}))
+
+            if (!existingUser) {
+                const id = uuid.v4()
+                existingUser = await(role==="customer" ? Customer.create({
+                    email : profile.emails[0].value,
+                    id,
+                    name: username,
+                    role
+                }):Designer.create({
+                    email : profile.emails[0].value,
+                    id,
+                    name: username,
+                    role
+                }))
+                const token = signJwt({
+                            email:profile.emails[0].value,
+                            role:role,
+                            id:id,
+                            name:username
+        
+                        })
+                        const user ={email:existingUser.email,name:existingUser.name,role:existingUser.role,id:existingUser.id}
+                        return done(null,{user,token})
+                    }
+                    const user = {
+                        email: existingUser.email,
+                        name: existingUser.name,
+                        role: existingUser.role,
+                        id: existingUser.id
+                    }
+                    const token = signJwt(user)
+                    return done(null,{user,token})
           
          }
          catch (error) {
