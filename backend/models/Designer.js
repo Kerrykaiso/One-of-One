@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
       id:{
         type: DataTypes.UUID,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       email: {
         type: DataTypes.STRING,
@@ -42,6 +43,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true
       }
     });
-   
+     Designer.associate=(models)=>{
+      Designer.hasMany(models.Product,{
+        foreignKey: "designer_id",
+        as: "Product",
+        onDelete: "CASCADE",
+        onUpdate:"CASCADE"
+      })
+     }
     return Designer;
   };

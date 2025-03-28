@@ -1,6 +1,7 @@
 const {matchedData, validationResult} = require("express-validator")
 const  AppError  = require("../utils/appError")
 const {registerDesignerService,loginDesignerService} = require("../services/designer-service")
+const { createWalletService } = require("../services/wallet-service")
 
 
 
@@ -21,6 +22,7 @@ const registerDesigner = async(req,res,next)=>{
       const err= new AppError("Error signing up..", "failed", 400)
       throw err
     }
+    const createWallet = await createWalletService(registered.id,next)
     return res.status(201).json({status:"success",data:registered})
 
  } catch (error) {

@@ -34,8 +34,27 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false 
      },
+     price:{
+      type: DataTypes.INTEGER,
+      allowNull:false
 
+     },
+     category:{
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+          isIn: [[ "Design", "Painted"]]
+      },
+     }
     },
+    {
+      afterFind: (result)=>{
+        if (result) {
+          result.mockupURLs = JSON.parse(result.mockupURLs)
+          result.designsURLs = JSON.parse(result.designsURLs)
+        }
+      }
+    }
    );
    
     return Submission;

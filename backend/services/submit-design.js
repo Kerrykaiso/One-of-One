@@ -1,17 +1,20 @@
 const cloudinary = require("../config/cloudinary.config")
 const multer  = require("multer");
 const {Submission} = require("../models")
+const {Stock} = require("../models")
 const AppError = require("../utils/appError");
 
 
-const  submitDesignService = async(mockupImages,designImages,next)=>{
+const  submitDesignService = async(mockupImages,designImages,userData,next)=>{
     try { 
-        //const {email,id,name} = req.data
 
         if (!mockupImages ||!designImages) {
           const appErr = new AppError("No image(s) provided","failed",400)
           throw appErr
       }
+
+      //check if selected color is still available
+
       const mockupURLs = []
       for (const file of mockupImages){
         const response = await cloudinary.uploader.upload(file.path,{resource_type:"image",folder:"oneofone_mockups"})
@@ -22,16 +25,15 @@ const  submitDesignService = async(mockupImages,designImages,next)=>{
         const response = await cloudinary.uploader.upload(file.path,{resource_type:"image",folder:"oneofone_designs"})
         designsURLs.push(response.secure_url)
       }
-
       if (!mockupURLs?.length && !designsURLs?.length) {
         return false
       }
       const stringDesign = JSON.stringify(designsURLs)
       const stringMockup = JSON.stringify(mockupURLs)
       const createSubmission = await Submission.create({
-        designerId: "123456",
-        designerName: "kachi",
-        designerEmail: "kachi@gmail.com",
+        designerId: userData.id,
+        designerName: userData.name,
+        designerEmail: userData.email,
         color: "blue",
         status:"pending",
         mockupURLs:stringMockup,
@@ -41,7 +43,6 @@ const  submitDesignService = async(mockupImages,designImages,next)=>{
         const err = new AppError("error adding submission to db", "failed", 400)
         throw err
       } 
-      console.log("here!!")
 
       return true
 
@@ -60,4 +61,33 @@ const upload = multer({ storage: storage });
 
 
 
-module.exports={upload,submitDesignService}
+
+const approveDesignService = async(data,id,next)=>{
+  try {
+    const findSubmission = await Submission.findByPk(id)
+
+    if (!findSubmission) {
+      const appErr = new AppError("can not find submission","failed", 400)
+      throw appErr
+    }
+    const updated = await findSubmission.update(data)
+
+    if (!updated) {
+       const appErr = new AppError("Could not update submission","failed", 400)
+      throw appErr 
+    }
+    
+
+    if (updated.status==="approved") {
+       const stock = await Stock.findOne({where:{color:updated.color},raw:true})
+       await stock.decrement("number", {by:1})
+    }
+    return updated
+
+  } catch (error) {
+     return next(error)
+  }
+}
+
+
+module.exports={upload,submitDesignService,approveDesignService}
