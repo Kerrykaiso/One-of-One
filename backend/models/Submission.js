@@ -1,6 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
     const Submission= sequelize.define('Submission', {
-
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       designerId: {
         type: DataTypes.STRING,
         allowNull: false,

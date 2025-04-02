@@ -3,8 +3,9 @@ const AppError = require("../utils/appError")
 const bcrypt = require("bcryptjs")
 
 
-const otpService=async(email,otp,next)=>{
+const otpService=async(data,next)=>{
   try {
+    const {email,otp} = data
     const findOTP = await OTP.findOne({where:{email:email},raw:true})
     if (!findOTP) {
         const appErr = new AppError("Designer does not exist","failed", 400)

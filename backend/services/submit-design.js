@@ -30,6 +30,11 @@ const  submitDesignService = async(mockupImages,designImages,userData,next)=>{
       }
       const stringDesign = JSON.stringify(designsURLs)
       const stringMockup = JSON.stringify(mockupURLs)
+      const sameName = await Submission.findOne({where:{name:userData.name}})
+      if (sameName) {
+        const err = new AppError("This name already exists for another product", "failed", 400)
+        throw err
+      }
       const createSubmission = await Submission.create({
         designerId: userData.id,
         designerName: userData.name,
@@ -89,5 +94,19 @@ const approveDesignService = async(data,id,next)=>{
   }
 }
 
-
-module.exports={upload,submitDesignService,approveDesignService}
+const getSubmissionsService = async(next)=>{
+  try {
+    const allSubmissions = await Submission.findAll({
+      order: [["createdAt", "DESC"]]
+    },{raw:true})
+    if (!allSubmissions) {
+      const appErr = new AppError("No submissions yet", "success", 200)
+      throw appErr
+    }
+   
+   return allSubmissions
+  } catch (error) {
+    next(error)
+  }
+}
+module.exports={upload,submitDesignService,approveDesignService,getSubmissionsService}

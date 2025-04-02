@@ -15,7 +15,6 @@ passport.use(
     async(req,accessToken, refreshToken, profile,done)=>{
         try {
             const role = req.session?.role
-           // console.log(`in strategy ${role}`)
             if (!profile) {
                 return done(new AppError("profile is not defined","failed", 400),false)
             }

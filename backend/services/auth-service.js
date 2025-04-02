@@ -42,7 +42,7 @@ const loginCustomerService= async(data,next)=>{
         const err = new AppError("Incorrect email or password", "failed", 401)
         throw err
     }
-    const isCorrect = await bcrypt.compare(password,findCustomer.password)
+    const isCorrect = await bcrypt.compare(password,findCustomer?.password)
     if (!isCorrect) {
         const err = new AppError("Incorrect email or password", "failed", 401) 
         throw err

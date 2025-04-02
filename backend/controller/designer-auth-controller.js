@@ -22,7 +22,10 @@ const registerDesigner = async(req,res,next)=>{
       const err= new AppError("Error signing up..", "failed", 400)
       throw err
     }
-    const createWallet = await createWalletService(registered.id,next)
+    const createWallet = await createWalletService(registered.id,registered.email,next)
+    if (createWallet) {
+      console.log("wallet created")
+    }
     return res.status(201).json({status:"success",data:registered})
 
  } catch (error) {

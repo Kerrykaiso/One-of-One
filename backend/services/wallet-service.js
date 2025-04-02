@@ -2,9 +2,9 @@ const {Wallet}= require("../models")
 const AppError = require("../utils/appError")
 
 
-const createWalletService =async(id,next)=>{
+const createWalletService =async(id,email,next)=>{
  try {
-    const createdWallet = await Wallet.create({designerId:id})
+    const createdWallet = await Wallet.create({designerId:id,email})
 
     if (!createdWallet) {
         const appErr = new AppError("Error creating wallet", "failed", 400)

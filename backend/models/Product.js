@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
     },
+    designerid:{
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     owner:{
         type: DataTypes.STRING,
         allowNull: true  
@@ -35,9 +39,17 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false 
     },
+    status:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue:"available",
+        validate:{
+            isIn:[["sold","processing","available"]]
+        } 
+    },
     qr_code:{
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull:true
     },
     category:{
         type: DataTypes.STRING,

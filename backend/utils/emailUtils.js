@@ -6,4 +6,4 @@ const generateOTP=()=>{
 const escapeHtml=(html)=>{
     return html.replace(/[&<>"']/g,'')
   }
-module.exports={generateOTP}
+module.exports={generateOTP,escapeHtml}

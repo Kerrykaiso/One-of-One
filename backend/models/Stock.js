@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      marterial: {
+      material: {
         type: DataTypes.STRING,
         allowNull: false,
       },
