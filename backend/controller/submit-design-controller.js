@@ -29,9 +29,6 @@ const  approveDesignController =async(req,res,next)=>{
       const appErr = new AppError("Could not approve design, something went wrong","failed",400)
       throw appErr
    }
-
-   //create product service
-   
     const emailData ={
       email: status.designerEmail,
       status: status.status,

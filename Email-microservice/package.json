@@ -4,7 +4,7 @@
   "main": "email.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "email": "nodemon email.js"
+    "email": "nodemon backend/email.js"
   },
   "keywords": [],
   "author": "",

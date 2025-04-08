@@ -1,5 +1,4 @@
-FROM node:22
-
+FROM node: 22
 WORKDIR /email-microservice
 COPY package*.json ./ 
 RUN npm install
