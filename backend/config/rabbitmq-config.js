@@ -1,5 +1,5 @@
 const amqp = require("amqplib")
-const RABBITMQ_URL ="amqp://localhost"
+const RABBITMQ_URL = process.env.RABBITMQ_URL
 
 let channel, connection
 const connectRabbitMq=async()=>{

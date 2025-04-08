@@ -1,5 +1,5 @@
 const { connectRabbitMq } = require("./config/rabbitMq")
-
+require("dotenv").config()
 const emailService  = async()=>{
     const channel = await connectRabbitMq()
   
