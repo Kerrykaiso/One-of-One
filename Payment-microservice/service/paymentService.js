@@ -1,6 +1,8 @@
 const axios = require('axios');
+const crypto = require("crypto")
 const AppError = require("../utils/appError")
 const generatePaystackRefrence = require('../utils/generate');
+const { constants } = require('fs/promises');
 
 
 const initiatePaymentService = async (paymentDetails,next) => {
@@ -25,7 +27,7 @@ const initiatePaymentService = async (paymentDetails,next) => {
         },
     }) 
     if (data && data.status) {
-        return data.data.authorization_url
+        return data.data
     } else {
         const appErr = new AppError("failed to initiate payment", "failed", 400)
         throw appErr
@@ -35,8 +37,23 @@ const initiatePaymentService = async (paymentDetails,next) => {
     }
 }
 
- const webhookSeviceService =()=>{
-
+ const webhookSeviceService =async(data,next)=>{
+    const secretKey = process.env.PAYSTACK_KEY
+    const hash = crypto.createHmac("sha512",secretKey).update(JSON.stringify(data)).digest("hex")
+    const order=data.metadata
+ try {
+  if (hash===req.headers["x-paystack-signature"]) {
+      if (data.event === "charge.success") {
+         return order
+      } else {
+        return true
+      }
+  } else{
+    return false
+  }
+ } catch (error) {
+    next(error)
+ }
  }
 
-module.exports = { initiatePaymentService};
+module.exports = { initiatePaymentService,webhookSeviceService};

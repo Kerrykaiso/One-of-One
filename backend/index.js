@@ -1,7 +1,7 @@
 const express = require("express")
 const app = express()
 require("dotenv").config()
-const errorHandler = require("./middlewares/error-middleware")
+const {errorHandler,nontfound} = require("./middlewares/error-middleware")
 const customerAuth  = require("./routes/auth-route")
 const designerAuth = require("./routes/designer-route")
 const adminAuth = require("./routes/admin-route")
@@ -18,6 +18,9 @@ const googleAuthCallback = require("./routes/google-auth-route")
 const testing = require("./routes/testing")
 require("./config/google-oauth")
 const db = require("./models")
+const { updateProductService } = require("./services/updateProduct-service")
+const requestLogger = require("./middlewares/logger-middleware")
+const { paymentProxy } = require("./config/proxy-config")
 const PORT = 8000
 
 app.use(session({
@@ -29,8 +32,9 @@ app.use(passport.initialize())
 //app.use(passport.session())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-
+app.use(requestLogger)
 app.use("/api", customerAuth)
+app.use("/api", paymentProxy)
 app.use("/api", restock)
 app.use("/api", designerAuth)
 app.use("/api", testing)
@@ -39,10 +43,17 @@ app.use("/api", submission)
 app.use("/api", profile)
 app.use("/api", verifyOTP)
 app.use("/auth", googleAuthCallback)
+app.use(nontfound)
 app.use(errorHandler)
 
 
 db.sequelize.sync({ alter:true }).then(() => {});
-app.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`);
+app.listen(PORT, async() => {
+  try {
+    await updateProductService()
+    console.log(`server running on port ${PORT}`);
+
+  } catch (error) {
+    console.log(error)
+  }
 });

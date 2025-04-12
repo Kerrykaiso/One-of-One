@@ -1,7 +1,7 @@
 FROM node:22
-WORKDIR /email-microservice
+WORKDIR /Payment-microservice
 COPY package*.json ./ 
 RUN npm install
 COPY . .
 EXPOSE 3000
-CMD ["node", "run", "email"]
+CMD ["node", "run", "payment"]
