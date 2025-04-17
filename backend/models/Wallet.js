@@ -16,8 +16,6 @@ module.exports=(sequelize, DataTypes)=>{
       },
       email:{
         type: DataTypes.STRING,
-        allowNull:true,
-        unique:true
       },
       balance:{
         type: DataTypes.DECIMAL(30,2),
@@ -26,7 +24,7 @@ module.exports=(sequelize, DataTypes)=>{
       },
       
       status:{
-        type:DataTypes.STRING,
+        type:DataTypes.STRING, 
         allowNull:false,
         defaultValue: "Active"
       }

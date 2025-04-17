@@ -15,7 +15,7 @@ const checkToken=(req,res,next)=>{
 
       jwt.verify(token, process.env.ONEOFONE_TOKEN, (err,user)=>{
           if(err){
-             return  res.status(400).json("invalid token")
+             return  res.status(400).json(err.message)
           }
           req.data=user
          next()

@@ -26,6 +26,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: false
       },
+      tier:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue:"free",
+        validate: {
+            isIn: [[ "free", "premium"]]
+        }
+      },
       role:{
         type: DataTypes.STRING,
         defaultValue: "Designer"

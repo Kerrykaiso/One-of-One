@@ -1,5 +1,5 @@
 const { connectRabbitMq } = require("../config/rabbitmq")
-const { initiatePaymentService, webhookSeviceService } = require("../service/paymentService")
+const { initiatePaymentService, webhookSeviceService, fundWallet } = require("../service/paymentService")
 const AppError = require("../utils/appError")
 
   
@@ -20,20 +20,52 @@ const AppError = require("../utils/appError")
   }
 
 
+const fundWalletController = async(req,res,next)=>{
+  const data = req.body
+  try {
+    const fundingInfo = await fundWallet(data,next)
+
+    if (!fundingInfo) {
+      const appErr = new AppError("Error funding wallet", "failed", 400)
+      throw appErr
+    }
+    res.status(201).json({status:"success",data:fundingInfo})
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+
+
   const webhookController =async (req,res,next)=>{
     const data = req.body
    try {
-    const orderInfo = await webhookSeviceService(data,next)
-    console.log(orderInfo)
-    const channel =await connectRabbitMq()
-    const exchangeName = "payment_success"
-    await channel.assertExchange(exchangeName, "fanout", {durable:true})
-    //send order to the 
+     
+      const Info = await webhookSeviceService(data,next)
+      console.log(Info)
+      if (Info.type ==="order") {
 
+        const channel =await connectRabbitMq()
+        const exchangeName = "payment_success"
+        await channel.assertExchange(exchangeName, "fanout", {durable:true})
+        //send order to the 0rder service
+
+      } else if(Info.type==="fund"){
+
+        const channel = await connectRabbitMq()
+        const exchangeName = "oneofone_exchange" //change exchange if this doesnt work
+        const routingKey = "fund_success"
+        await channel.assertExchange(exchangeName, "direct", {durable:true})
+        channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(Info)))    
+      }
+  
+  
+     
      return res.status(200).end()
    } catch (error) {
      next(error)
    }
   }
 
-  module.exports = {paymentController}
+  module.exports = {paymentController,webhookController,fundWalletController}

@@ -19,10 +19,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
     },
-    designerid:{
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     owner:{
         type: DataTypes.STRING,
         allowNull: true  
@@ -36,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false 
     },
     description:{
-        type: DataTypes.STRING,
+        type: DataTypes.STRING, 
         allowNull: false 
     },
     status:{

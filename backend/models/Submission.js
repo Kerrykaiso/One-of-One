@@ -37,10 +37,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false 
      },
+     designName:{
+      type: DataTypes.STRING
+     },
      price:{
       type: DataTypes.INTEGER,
       allowNull:false
 
+     },
+     designerTier:{
+      type: DataTypes.STRING
      },
      category:{
       type: DataTypes.STRING,

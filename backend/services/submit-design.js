@@ -1,30 +1,49 @@
-const cloudinary = require("../config/cloudinary.config")
 const multer  = require("multer");
+const {Worker} = require("worker_threads")
 const {Submission} = require("../models")
 const {Stock} = require("../models")
+
+const {Designer} = require("../models")
 const AppError = require("../utils/appError");
 
 
-const  submitDesignService = async(mockupImages,designImages,userData,next)=>{
+const  submitDesignService = async(mockupImages,designImages,userData,color,designName,price,category,next)=>{
     try { 
 
         if (!mockupImages ||!designImages) {
           const appErr = new AppError("No image(s) provided","failed",400)
           throw appErr
       }
-
+     const designer= await Designer.findByPk(userData.id)
+     const tier = designer.get({plain:true}).tier
       //check if selected color is still available
 
-      const mockupURLs = []
-      for (const file of mockupImages){
-        const response = await cloudinary.uploader.upload(file.path,{resource_type:"image",folder:"oneofone_mockups"})
-        mockupURLs.push(response.secure_url)
+      // const mockupURLs = []
+     
+      // const designsURLs = []
+    
+   
+      const uploadImagestoWorker = (mockupImages,designImages)=>{
+        return new Promise((resolve,reject)=>{
+          const worker = new Worker("./services/worker.js", {workerData:{mockupImages,designImages}})
+          worker.on("message",(result)=>{
+            // if (result.error) {
+            //   console.log(result.error)
+            //   return reject(new AppError("error","failed", 400))
+            // }
+            console.log(result)
+            resolve(result)
+          })
+         // worker.on("error",reject(new AppError("something went wrong in the image upload", "failed",400)))
+          worker.on("exit",(code)=>{
+            if (code != 0) {
+              reject(new AppError(code, "failed", 400))
+            }
+          })
+        })
+
       }
-      const designsURLs = []
-      for (const file of designImages){
-        const response = await cloudinary.uploader.upload(file.path,{resource_type:"image",folder:"oneofone_designs"})
-        designsURLs.push(response.secure_url)
-      }
+      const {mockupURLs,designsURLs} = await uploadImagestoWorker(mockupImages,designImages)
       if (!mockupURLs?.length && !designsURLs?.length) {
         return false
       }
@@ -37,12 +56,17 @@ const  submitDesignService = async(mockupImages,designImages,userData,next)=>{
       }
       const createSubmission = await Submission.create({
         designerId: userData.id,
+        name:userData.name,
         designerName: userData.name,
         designerEmail: userData.email,
-        color: "blue",
+        category,
+        designName,
+        price: price,
+        color: color,
         status:"pending",
         mockupURLs:stringMockup,
-        designsURLs:stringDesign
+        designsURLs:stringDesign,
+        designerTier: tier
       })
       if (!createSubmission) {
         const err = new AppError("error adding submission to db", "failed", 400)
@@ -75,8 +99,7 @@ const approveDesignService = async(data,id,next)=>{
       const appErr = new AppError("can not find submission","failed", 400)
       throw appErr
     }
-    const updated = await findSubmission.update(data)
-
+     const updated =  await findSubmission.update(data)
     if (!updated) {
        const appErr = new AppError("Could not update submission","failed", 400)
       throw appErr 

@@ -3,7 +3,6 @@ const db = require("../models/index")
 const {Product} = require("../models")
 const AppError = require("../utils/appError")
 
-
 const updateProductService =async()=>{
     const transact =await db.sequelize.transaction()
     try {
@@ -19,7 +18,7 @@ const updateProductService =async()=>{
                 const msgContent=JSON.parse(msg.content)
                 console.log(msgContent)
                 const product = await Product.findByPk(msgContent.productId)
-                const updatedProduct = await product.update({owner:msgContent.owner,status:"sold"})
+                const updatedProduct = await product.update({owner:msgContent.owner,status:"sold"},{transaction:transact})
                 await transact.commit()
                 console.log(updatedProduct)
             } catch (error) {

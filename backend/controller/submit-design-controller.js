@@ -1,13 +1,18 @@
 const { connectRabbitMq } = require("../config/rabbitmq-config");
-const { submitDesignService, approveDesignService,getSubmissionsService } = require("../services/submit-design")
+const { submitDesignService, approveDesignService,getSubmissionsService } = require("../services/submit-design");
+const { checkWalletBalance } = require("../services/wallet-service");
 const AppError = require("../utils/appError")
 
 const submitController=async(req,res,next)=>{
  try {
+  const color = req.body.color
+  const price = req.body.price
+  const category = req.body.category
+  const designName =req.body.designName
    const userData = req.data
    const mockupImages = req.files["mockups"];
    const designImages = req.files["designs"];
-    const submitSuccess = await submitDesignService(mockupImages,designImages,userData,next)
+    const submitSuccess = await submitDesignService(mockupImages,designImages,userData,color,designName,price,category,next)
     if (!submitSuccess) {
         const appErr = new AppError("failed to upload,something went wrong","failed",400)
         throw appErr
@@ -23,6 +28,12 @@ const  approveDesignController =async(req,res,next)=>{
  try {
    const data = req.body
    const id = req.params.id
+   const sufficientBalance = await checkWalletBalance(data,next)
+
+   if (!sufficientBalance) {
+     const appErr = new AppError("Insufficient wallet balance","failed",400)
+     throw appErr
+   }
    const status = await approveDesignService(data,id,next)
 
    if (!status) {

@@ -8,6 +8,12 @@ const onProxyError =(err,req,res)=>{
 
     }
 }
+const fundingWalletProxyReq=(proxyReq,req)=>{
+    const user = req.data
+    if (user) {
+      proxyReq.setHeader("x-user",JSON.stringify(user))  
+    }
+}
 
 
 const paymentProxy  =createProxyMiddleware({
@@ -20,6 +26,15 @@ const paymentProxy  =createProxyMiddleware({
     }
 })
 
+const fundWalletProxy = createProxyMiddleware({
+    target:"http://localhost:5000",
+    changeOrigin:true,
+    pathRewrite:{"^/api/fund-wallet":"/fund-wallet/funding"},
+    timeout: 5000,
+    on:{
+        error:onProxyError,
+        proxyReq: fundingWalletProxyReq
+    }
+})
 
-
-module.exports ={paymentProxy}
+module.exports ={paymentProxy,fundWalletProxy}

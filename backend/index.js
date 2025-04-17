@@ -20,7 +20,7 @@ require("./config/google-oauth")
 const db = require("./models")
 const { updateProductService } = require("./services/updateProduct-service")
 const requestLogger = require("./middlewares/logger-middleware")
-const { paymentProxy } = require("./config/proxy-config")
+const { paymentProxy,fundWalletProxy} = require("./config/proxy-config")
 const PORT = 8000
 
 app.use(session({
@@ -34,7 +34,8 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(requestLogger)
 app.use("/api", customerAuth)
-app.use("/api", paymentProxy)
+app.use("/api/payment", paymentProxy)
+app.use("/api/fund-wallet", fundWalletProxy)
 app.use("/api", restock)
 app.use("/api", designerAuth)
 app.use("/api", testing)

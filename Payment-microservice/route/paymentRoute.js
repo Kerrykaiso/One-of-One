@@ -1,8 +1,9 @@
 const router = require("express").Router()
-const { paymentController } = require("../controller/paymentController")
+const { paymentController, fundWalletController } = require("../controller/paymentController")
 
 
 router.post("/initiate-payment", paymentController)
+router.post("/funding",fundWalletController)
 
 
 module.exports = router
