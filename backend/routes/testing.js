@@ -19,15 +19,15 @@ router.get("/test", async(req,res)=>{
     //   await cache.setEx("designers",3600,JSON.stringify(designers))
     //   console.log("cache miss")
     //   return res.json(designers)
-    const findTest = await Testing.findOne({where:{number:9},raw:true})
+    const findTest = await Testing.findOne({where:{number:11}})
     //const plain = findTest.get({plain:true})
-    // const increased = await findTest.increment("number",{by: parseInt(2)})
-    // const created = increased.get({plain:true})
-        console.log(findTest)
+    const decrease = await findTest.decrement("number",{by: parseInt(2)})
+     const created = decrease.get({plain:true})
+        console.log(decrease)
   //  const updatedAmount=  await findTest.increment("balance",{by:creditAmount,transaction})
 
     } catch (error) {
-       // throw new Error(error.msg)
+        throw new Error(error.message)
     }
 })
 router.get("/test-session",(req,res)=>{

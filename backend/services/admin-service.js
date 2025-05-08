@@ -98,4 +98,9 @@ const loginAdminService=async(data,next)=>{
       next(error)
   }
 }
+
+
+
+
+
 module.exports={createManagerService,createSalesPersonService,createCeoService, loginAdminService}

@@ -18,9 +18,7 @@ const  submitDesignService = async(mockupImages,designImages,userData,color,desi
      const tier = designer.get({plain:true}).tier
       //check if selected color is still available
 
-      // const mockupURLs = []
      
-      // const designsURLs = []
     
    
       const uploadImagestoWorker = (mockupImages,designImages)=>{
@@ -132,4 +130,19 @@ const getSubmissionsService = async(next)=>{
     next(error)
   }
 }
-module.exports={upload,submitDesignService,approveDesignService,getSubmissionsService}
+
+const getSubmissionsById = async(id,next)=>{
+ try {
+  const submission = await Submission.findByPk(id)
+
+  if (!submission) {
+      const appErr = new AppError("Submission not found", "failed", 404)
+      throw appErr
+    }
+    const submissionDetails = submission.get({plain:true})
+    return submissionDetails
+  } catch (error) {
+   next(error)
+ }
+}
+module.exports={upload,submitDesignService,approveDesignService,getSubmissionsService,getSubmissionsById}

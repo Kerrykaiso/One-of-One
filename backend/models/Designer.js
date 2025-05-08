@@ -1,5 +1,3 @@
-const { TimeSeriesBucketTimestamp } = require("redis");
-const OTP=require("./otp")
 
 module.exports = (sequelize, DataTypes) => {
     const Designer = sequelize.define('Designer', {

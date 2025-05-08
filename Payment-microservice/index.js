@@ -7,10 +7,13 @@ const fundWalletRoute = require("./route/fundwalletRoute")
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
+app.use((req,res,next)=>{
+    console.log("incoming:", req.path)
+    next()
+})
 app.use("/payment",paymentRoute)
-app.use("/fund-wallet",paymentRoute)
+app.use("/fund-wallet",fundWalletRoute)
 
-app.use(errorHandler)
 app.use(errorHandler)
 const PORT = 5000
 app.listen(PORT,()=>{

@@ -5,7 +5,9 @@ const AppError = require("../utils/appError")
   
 
   const paymentController =async (req,res,next)=>{
-       const data = req.body
+       const details = req.body
+       const userId = req.data.id
+      const data = {...details,userId}
    try {
     const paymentInfo = await initiatePaymentService(data,next)
 
@@ -21,7 +23,9 @@ const AppError = require("../utils/appError")
 
 
 const fundWalletController = async(req,res,next)=>{
-  const data = req.body
+  const amount = req.body
+  const designerId = req.headers["x-user"].id
+  const data ={amount,designerId}
   try {
     const fundingInfo = await fundWallet(data,next)
 
@@ -49,9 +53,10 @@ const fundWalletController = async(req,res,next)=>{
         const channel =await connectRabbitMq()
         const exchangeName = "payment_success"
         await channel.assertExchange(exchangeName, "fanout", {durable:true})
+        channel.publish(exchangeName,"",Buffer.from(JSON.stringify(Info)))
         //send order to the 0rder service
-
-      } else if(Info.type==="fund"){
+       //update product
+      } else if(Info.type==="funding"){
 
         const channel = await connectRabbitMq()
         const exchangeName = "oneofone_exchange" //change exchange if this doesnt work

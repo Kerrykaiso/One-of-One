@@ -2,15 +2,14 @@ const axios = require('axios');
 const crypto = require("crypto")
 const AppError = require("../utils/appError")
 const generatePaystackRefrence = require('../utils/generate');
-const { constants } = require('fs/promises');
 
 
 const initiatePaymentService = async (paymentDetails,next) => {
-    const { amount, email, designerId, productId, address,username,userEmail,userId,type } = paymentDetails;
+    const { amount, email, designer_id, productId, address,owner} = paymentDetails;
 
     try {
         const reference = generatePaystackRefrence()
-        const metadata ={...paymentDetails,type:"order",reference}
+        const metadata ={...paymentDetails,designer_id,type:"order",paymentRef:reference}
 
         const paystackParams = {
             amount: amount * 100, //Paystack requires the amount in kobo
@@ -73,7 +72,7 @@ const fundWallet=async(details,next)=>{
 }
 
 
- const webhookSeviceService =async(data,next)=>{
+ const webhookSeviceService =async(data,req,next)=>{
     const secretKey = process.env.PAYSTACK_KEY
     const hash = crypto.createHmac("sha512",secretKey).update(JSON.stringify(data)).digest("hex")
     const info=data.metadata

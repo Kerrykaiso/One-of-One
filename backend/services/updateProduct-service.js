@@ -12,13 +12,14 @@ const updateProductService =async()=>{
         const channel = await connectRabbitMq()
         await channel.assertExchange(exchangeName,"fanout",{durable:true})
         await channel.assertQueue(queueName,{durable:true})
-        await channel.bindQueue(queueName,exchangeName)
+        await channel.bindQueue(queueName,exchangeName,"")
         channel.consume(queueName, async(msg)=>{
             try {
-                const msgContent=JSON.parse(msg.content)
+                const msgContent=JSON.parse(msg.content.metadata)
                 console.log(msgContent)
                 const product = await Product.findByPk(msgContent.productId)
                 const updatedProduct = await product.update({owner:msgContent.owner,status:"sold"},{transaction:transact})
+                channel.ack(msg)
                 await transact.commit()
                 console.log(updatedProduct)
             } catch (error) {

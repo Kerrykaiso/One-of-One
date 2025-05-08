@@ -19,7 +19,7 @@ const fundingWalletProxyReq=(proxyReq,req)=>{
 const paymentProxy  =createProxyMiddleware({
     target:"http://localhost:5000",
     changeOrigin:true,
-    pathRewrite:{"^/api/payment":"/payment"},
+    pathRewrite:{"/^initiate-pay":"/payment"},
     timeout: 5000,
     on:{
         error:onProxyError
@@ -29,7 +29,7 @@ const paymentProxy  =createProxyMiddleware({
 const fundWalletProxy = createProxyMiddleware({
     target:"http://localhost:5000",
     changeOrigin:true,
-    pathRewrite:{"^/api/fund-wallet":"/fund-wallet/funding"},
+    pathRewrite:{"^/fund-wallet":"/fund-wallet/funding"},
     timeout: 5000,
     on:{
         error:onProxyError,

@@ -1,7 +1,9 @@
 const { connectRabbitMq } = require("../config/rabbitmq-config");
+const { checkDesignerTier } = require("../services/designer-profile");
 const { submitDesignService, approveDesignService,getSubmissionsService } = require("../services/submit-design");
-const { checkWalletBalance } = require("../services/wallet-service");
-const AppError = require("../utils/appError")
+const { checkWalletBalance, debitWallet } = require("../services/wallet-service");
+const AppError = require("../utils/appError");
+const { escapeHtml } = require("../utils/emailUtils");
 
 const submitController=async(req,res,next)=>{
  try {
@@ -27,14 +29,27 @@ const submitController=async(req,res,next)=>{
 const  approveDesignController =async(req,res,next)=>{
  try {
    const data = req.body
+   const designerId = req.body.designerId
    const id = req.params.id
-   const sufficientBalance = await checkWalletBalance(data,next)
+   
+   const tier = await checkDesignerTier(designerId,next)
 
-   if (!sufficientBalance) {
-     const appErr = new AppError("Insufficient wallet balance","failed",400)
-     throw appErr
+   if (tier==="premium") {
+    const sufficientBalance = await checkWalletBalance(designerId,next)
+
+    if (!sufficientBalance) {
+      const appErr = new AppError("Insufficient wallet balance","failed",400)
+      throw appErr
+    }
+
+    const debitDesignerWallet = await debitWallet(designerId,next)
+    if (!debitDesignerWallet) {
+      const appErr = new AppError("Error debiting wallet","failed",400)
+      throw appErr
+    }
    }
-   const status = await approveDesignService(data,id,next)
+  
+   const status = await approveDesignService(data,escapeHtml(id),next)
 
    if (!status) {
       const appErr = new AppError("Could not approve design, something went wrong","failed",400)
@@ -43,10 +58,12 @@ const  approveDesignController =async(req,res,next)=>{
     const emailData ={
       email: status.designerEmail,
       status: status.status,
-      name: status.designerName
+      name: status.designerName,
+      designName: status.designName
     }
    //send mail via the email microservice
     //connect to rabbitmq and publish the message
+
    const channel = await connectRabbitMq()
    const exchangeName = "oneofone_exchange"
    const routingKey = "Email_approval"
@@ -73,4 +90,18 @@ const getSubmissionsController =async(req,res,next)=>{
     return next(error)
   }
 }
-module.exports={submitController,approveDesignController,getSubmissionsController}
+
+const getSubmissionById =async(req,res,next)=>{
+ try {
+   const id = req.params.id
+   const submission = await getSubmissionById(escapeHtml(id),req,next)
+   if (!submission) {
+    const appErr = new AppError("Error fetching this submission","failed",400)
+    throw appErr
+   }
+   res.status(200).json(submission)
+ } catch (error) {
+   next(error)
+ }
+}
+module.exports={submitController,approveDesignController,getSubmissionsController,getSubmissionById}

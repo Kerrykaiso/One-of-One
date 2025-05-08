@@ -31,4 +31,18 @@ const editProfileService = async(id,data,next)=>{
         return next(error)
     }
 }
-module.exports={profileService,editProfileService}
+
+const checkDesignerTier = async(id,next)=>{
+  try {
+    const findDesigner = await Designer.findByPk(id)
+    if (!findDesigner) {
+        const appErr = new AppError("could not find designer profile","failed",400)
+        throw appErr  
+    }
+    const tier = findDesigner.get({plain:true}).tier
+    return tier
+  } catch (error) {
+     next(error)
+  }
+}
+module.exports={profileService,editProfileService,checkDesignerTier}

@@ -1,4 +1,5 @@
 const {Wallet}= require("../models")
+const {constants} =require("../utils/constants")
 const AppError = require("../utils/appError")
 const db = require("../models/index")
 
@@ -18,7 +19,7 @@ const createWalletService =async(id,email,next)=>{
 }
 
 
-const fundWalletService = async(designerId,amount,next)=>{
+const fundWalletService = async(designerId,amount,)=>{
    const transaction =await db.sequelize.transaction()
    
  try {
@@ -37,9 +38,11 @@ const fundWalletService = async(designerId,amount,next)=>{
       const appErr = new AppError("Error funding wallet", "failed", 400)
        throw appErr
    }
-
+    await transaction.commit()
  } catch (error) {
-   next(error)
+   await transaction.rollback()
+   const appErr = new AppError(error.message, "failed", 400)
+   throw appErr
  }
 }
 
@@ -51,7 +54,7 @@ const checkWalletBalance=async(designerId,next)=>{
       const appErr = new AppError("Error finding wallet", "failed", 400)
       throw appErr
    }
-   if (findDesignerWallet.balance < 10000) {
+   if (findDesignerWallet.balance < constants.PRICE_OF_BLANKS) {
        return false
    }
    return true
@@ -59,4 +62,28 @@ const checkWalletBalance=async(designerId,next)=>{
      next(error)
   }
 }
-module.exports ={createWalletService,checkWalletBalance}
+
+
+const debitWallet =async(designerId,next)=>{
+   const transaction =await db.sequelize.transaction()
+ try {
+   const findDesignerWallet = await Wallet.findOne({where:{designerId}})
+   
+   if (!findDesignerWallet) {
+      const appErr = new AppError("Error finding wallet", "failed", 400)
+        throw appErr
+   }
+   const updateAmount=  await findDesignerWallet.decrement("balance",{by:constants.PRICE_OF_BLANKS,transaction})
+   const  newValue = updateAmount.get({plain:true})
+   if (!newValue) {
+      const appErr = new AppError("Error funding wallet", "failed", 400)
+       throw appErr
+   }
+   await transaction.commit()
+   return true
+ } catch (error) {
+   transaction.rollback()
+   next(error)
+ }
+}
+module.exports ={createWalletService,checkWalletBalance,fundWalletService,debitWallet}
