@@ -65,7 +65,7 @@ const checkWalletBalance=async(designerId,next)=>{
 
 
 const debitWallet =async(designerId,next)=>{
-   const transaction =await db.sequelize.transaction()
+   const transaction = await db.sequelize.transaction()
  try {
    const findDesignerWallet = await Wallet.findOne({where:{designerId}})
    

@@ -6,8 +6,17 @@ const signJwt = (tokenData) =>{
   return jwt.sign({email: tokenData.email, role: tokenData.role, name: tokenData.name,id:tokenData.id},
     process.env.ONEOFONE_TOKEN, {expiresIn: "2d"})
 }
+  
+
+const  publicRoute = ["/health","/register-ceo", "/login-admin",
+  "/register-customer","/login-customer","/register-designer", "/login-designer"]
 
 const checkToken=(req,res,next)=>{
+
+   if (publicRoute.includes(req.path)) {
+     return next()
+   }
+   
   const authHeader = req.headers.authorization
 
   if (authHeader) {
@@ -43,6 +52,7 @@ const designerAuth=async(req, res, next)=>{
 }
 
 const customerAuth=(req, res, next)=>{
+  
   try {
     checkToken(req, res,async()=>{
       const findCustomer = await Customer.findOne({where:{id:req.data.id}})
