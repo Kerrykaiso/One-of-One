@@ -6,6 +6,7 @@ const fundWallet =async()=>{
     const queueName ="fund_service"
     const routingKey ="fund_success"
     const exchangeName = "oneofone_exchange"
+    const channel = await connectRabbitMq()
     await channel.assertExchange(exchangeName,"direct",{durable:true})
     await channel.assertQueue(queueName,{durable:true})
     await channel.bindQueue(queueName,exchangeName,routingKey)

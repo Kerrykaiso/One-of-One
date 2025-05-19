@@ -6,7 +6,7 @@ const router = require("express").Router()
 router.get("/home",(req,res)=>{
     res.send("<a href='/auth/google'>login with google<a/>")
 })
-router.get("/test", async(req,res)=>{
+router.put("/test", async(req,res)=>{
     try {
     //     const cache = await initializerRedis()
     //     let designers =await cache.get("designers")
@@ -19,11 +19,11 @@ router.get("/test", async(req,res)=>{
     //   await cache.setEx("designers",3600,JSON.stringify(designers))
     //   console.log("cache miss")
     //   return res.json(designers)
-    const findTest = await Testing.findOne({where:{number:11}})
+    const findTest = await Testing.findByPk(1)
     //const plain = findTest.get({plain:true})
-    const decrease = await findTest.decrement("number",{by: parseInt(2)})
+    const decrease = await findTest.update({number:20})
      const created = decrease.get({plain:true})
-        console.log(decrease)
+        console.log(created)
   //  const updatedAmount=  await findTest.increment("balance",{by:creditAmount,transaction})
 
     } catch (error) {

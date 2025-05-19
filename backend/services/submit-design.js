@@ -2,14 +2,14 @@ const multer  = require("multer");
 const {Worker} = require("worker_threads")
 const {Submission} = require("../models")
 const {Stock} = require("../models")
-
+const uuid = require("uuid")
 const {Designer} = require("../models")
 const AppError = require("../utils/appError");
 
 
 const  submitDesignService = async(mockupImages,designImages,userData,color,designName,price,category,next)=>{
+  let id
     try { 
-
         if (!mockupImages ||!designImages) {
           const appErr = new AppError("No image(s) provided","failed",400)
           throw appErr
@@ -22,8 +22,9 @@ const  submitDesignService = async(mockupImages,designImages,userData,color,desi
     
    
       const uploadImagestoWorker = (mockupImages,designImages)=>{
+         id = uuid.v4()
         return new Promise((resolve,reject)=>{
-          const worker = new Worker("./services/worker.js", {workerData:{mockupImages,designImages}})
+          const worker = new Worker("./services/worker.js", {workerData:{mockupImages,designImages,id}})
           worker.on("message",(result)=>{
             // if (result.error) {
             //   console.log(result.error)
@@ -41,7 +42,7 @@ const  submitDesignService = async(mockupImages,designImages,userData,color,desi
         })
 
       }
-      const {mockupURLs,designsURLs} = await uploadImagestoWorker(mockupImages,designImages)
+      const {mockupURLs,designsURLs, qrCodeUrl} = await uploadImagestoWorker(mockupImages,designImages)
       if (!mockupURLs?.length && !designsURLs?.length) {
         return false
       }
@@ -53,11 +54,13 @@ const  submitDesignService = async(mockupImages,designImages,userData,color,desi
         throw err
       }
       const createSubmission = await Submission.create({
+        id:id,
         designerId: userData.id,
         name:userData.name,
         designerName: userData.name,
         designerEmail: userData.email,
         category,
+        qrCodeUrl,
         designName,
         price: price,
         color: color,
@@ -103,12 +106,12 @@ const approveDesignService = async(data,id,next)=>{
       throw appErr 
     }
     
-
-    if (updated.status==="approved") {
-       const stock = await Stock.findOne({where:{color:updated.color},raw:true})
+       const plain = updated.get({plain:true})
+    if (plain.status==="accepted") {
+       const stock = await Stock.findOne({where:{color:updated.color}})
        await stock.decrement("number", {by:1})
     }
-    return updated
+    return plain
 
   } catch (error) {
      return next(error)

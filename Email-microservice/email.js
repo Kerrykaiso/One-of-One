@@ -12,7 +12,7 @@ const emailService  = async()=>{
        try {
          const msgContent=JSON.parse(msg.content)
          console.log(msgContent)
-         if (msgContent.status ==="approved") {
+         if (msgContent.status ==="accepted") {
           //send approval mail
          }
          //send rejection mail

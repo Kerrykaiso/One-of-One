@@ -43,10 +43,6 @@ module.exports = (sequelize, DataTypes) => {
             isIn:[["sold","processing","available"]]
         } 
     },
-    qr_code:{
-        type: DataTypes.STRING,
-        allowNull:true
-    },
     category:{
         type: DataTypes.STRING,
         allowNull: false,

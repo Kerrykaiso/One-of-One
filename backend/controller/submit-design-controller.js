@@ -68,6 +68,7 @@ const  approveDesignController =async(req,res,next)=>{
    const exchangeName = "oneofone_exchange"
    const routingKey = "Email_approval"
    await channel.assertExchange(exchangeName, "direct", {durable:true})
+   //send event for creating product
    channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(emailData)))
 
    res.status(200).json("submission status changed")

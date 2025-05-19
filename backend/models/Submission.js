@@ -1,5 +1,12 @@
+
+
 module.exports = (sequelize, DataTypes) => {
     const Submission= sequelize.define('Submission', {
+      id:{
+        type: DataTypes.UUID,
+         primaryKey: true,
+         allowNull: false
+      },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -46,6 +53,9 @@ module.exports = (sequelize, DataTypes) => {
 
      },
      designerTier:{
+      type: DataTypes.STRING
+     },
+     qrCodeUrl:{
       type: DataTypes.STRING
      },
      category:{
