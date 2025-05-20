@@ -12,9 +12,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       material: {
         type: DataTypes.STRING,
+        defaultValue:"cotton",
         allowNull: false,
       },
-   
+     designerEmail:{
+        type: DataTypes.STRING,
+        allowNull: false
+     },
     designer:{
         type: DataTypes.STRING,
         allowNull: false
@@ -35,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING, 
         allowNull: false 
     },
+    size:{
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     status:{
         type: DataTypes.STRING,
         allowNull: false,
@@ -42,6 +50,10 @@ module.exports = (sequelize, DataTypes) => {
         validate:{
             isIn:[["sold","processing","available"]]
         } 
+    },
+    productImage:{
+         type: DataTypes.STRING,
+         allowNull:false
     },
     category:{
         type: DataTypes.STRING,

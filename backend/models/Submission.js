@@ -27,12 +27,19 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      size:{
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      description:{
+        type: DataTypes.TEXT,
+      },
       status:{
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue:"pending",
         validate: {
-            isIn: [["pending", "accepted", "rejected"]]
+            isIn: [["pending", "accepted", "rejected","listed"]]
         }
       },
       mockupURLs:{

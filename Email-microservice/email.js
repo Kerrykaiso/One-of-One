@@ -14,8 +14,14 @@ const emailService  = async()=>{
          console.log(msgContent)
          if (msgContent.status ==="accepted") {
           //send approval mail
+         } else if(msgContent.status ==="rejected"){
+          //send rejection mail
+         }else if(msgContent.status ==="sold"){
+          //send sold mail
+         }else if(msgContent.status ==="listed"){
+
          }
-         //send rejection mail
+         
         channel.ack(msg)
        } catch (error) {
         channel.nack(msg)

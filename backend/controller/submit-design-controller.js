@@ -11,10 +11,11 @@ const submitController=async(req,res,next)=>{
   const price = req.body.price
   const category = req.body.category
   const designName =req.body.designName
+  const size = req.body.size
    const userData = req.data
    const mockupImages = req.files["mockups"];
    const designImages = req.files["designs"];
-    const submitSuccess = await submitDesignService(mockupImages,designImages,userData,color,designName,price,category,next)
+    const submitSuccess = await submitDesignService(mockupImages,designImages,userData,color,designName,price,category,size,next)
     if (!submitSuccess) {
         const appErr = new AppError("failed to upload,something went wrong","failed",400)
         throw appErr

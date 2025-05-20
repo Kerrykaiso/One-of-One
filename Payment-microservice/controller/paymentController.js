@@ -47,18 +47,26 @@ const fundWalletController = async(req,res,next)=>{
    try {
      
       const Info = await webhookSeviceService(data,next)
-      console.log(Info)
-      if (Info.type ==="order") {
+      const {designerEmail,name,price} = Info
 
-        const channel =await connectRabbitMq()
+      const emailData = {
+        status:"sold",
+        email: designerEmail,
+        name,
+        price}
+
+      const channel =await connectRabbitMq()
+
+      if (Info.type ==="order") {
         const exchangeName = "payment_success"
         await channel.assertExchange(exchangeName, "fanout", {durable:true})
         channel.publish(exchangeName,"",Buffer.from(JSON.stringify(Info)))
         //send order to the 0rder service
        //update product
+       await channel.assertExchange("oneofone_exchange", "direct", {durable:true})
+       channel.publish("oneofone_exchange", "Email_approval", Buffer.from(JSON.stringify(emailData)))
+       //send email
       } else if(Info.type==="funding"){
-
-        const channel = await connectRabbitMq()
         const exchangeName = "oneofone_exchange" //change exchange if this doesnt work
         const routingKey = "fund_success"
         await channel.assertExchange(exchangeName, "direct", {durable:true})

@@ -5,7 +5,7 @@ const generatePaystackRefrence = require('../utils/generate');
 
 
 const initiatePaymentService = async (paymentDetails,next) => {
-    const { amount, email, designer_id, productId, address,owner} = paymentDetails;
+    const { amount, email, designer_id, productId, address,designerEmail} = paymentDetails;
 
     try {
         const reference = generatePaystackRefrence()

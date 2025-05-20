@@ -7,10 +7,10 @@ const {Designer} = require("../models")
 const AppError = require("../utils/appError");
 
 
-const  submitDesignService = async(mockupImages,designImages,userData,color,designName,price,category,next)=>{
+const  submitDesignService = async(mockupImages,designImages,userData,color,designName,price,category,size,next)=>{
   let id
     try { 
-        if (!mockupImages ||!designImages) {
+        if (!mockupImages || !designImages) {
           const appErr = new AppError("No image(s) provided","failed",400)
           throw appErr
       }
@@ -55,6 +55,7 @@ const  submitDesignService = async(mockupImages,designImages,userData,color,desi
       }
       const createSubmission = await Submission.create({
         id:id,
+        size,
         designerId: userData.id,
         name:userData.name,
         designerName: userData.name,
@@ -147,5 +148,79 @@ const getSubmissionsById = async(id,next)=>{
   } catch (error) {
    next(error)
  }
+}
+
+
+const getAcceptedDesigns = async(next)=>{
+
+  try {
+    const acceptedDesigns  =  await Submission.findAll({where:{status:"accepted"},order:[["createdAt", "DESC"]],raw:true})
+    if (!acceptedDesigns.length ) {
+      return {message:"No approved submissions yet"}
+    }
+    return acceptedDesigns
+
+  } catch (error) {
+    next(error)
+  }
+}
+
+const listSubmission =async (id,productImages,next)=>{
+  try {
+    if (!productImages) {
+      const appErr = new AppError("No image(s) provided","failed",400)
+      throw appErr
+    }
+    let findSubmission = await Submission.findByPk(id)
+    
+    const uploadImagestoWorker = (productImages)=>{
+     return new Promise((resolve,reject)=>{
+       const worker = new Worker("./services/worker2.js", {workerData:{productImages}})
+       worker.on("message",(result)=>{
+     
+         console.log(result)
+         resolve(result)
+       })
+      // worker.on("error",reject(new AppError("something went wrong in the image upload", "failed",400)))
+       worker.on("exit",(code)=>{
+         if (code != 0) {
+           reject(new AppError(code, "failed", 400))
+         }
+       })
+     })
+   }
+    
+   const  {shirtImage} = uploadImagestoWorker(productImages)
+   if (!shirtImage.length) {
+    return false
+   }
+
+   const stringifyShirtImage = JSON.stringify(shirtImage)
+   const submissionUpdate = findSubmission.update({status:"listed"})
+   if (!submissionUpdate) {
+    const err = new AppError("Error updating submission", "failed",400)
+    throw err
+   }
+   const submisionData = submissionUpdate.get({plain:true})
+
+   const createProductDetails = {
+    status :submisionData.status,
+    designerEmail: submisionData.designerEmail,
+    id:submisionData.id,
+    name: submisionData.name,
+    designerName: submisionData.designName,
+    category: submisionData.category,
+    price : submisionData.price,
+    size:submisionData.size,
+    designer_id: submisionData.designerId,
+    description: submisionData.description,
+    color: submisionData.color
+   }
+
+   return createProductDetails
+   
+  } catch (error) {
+    next(error)
+  }
 }
 module.exports={upload,submitDesignService,approveDesignService,getSubmissionsService,getSubmissionsById}
