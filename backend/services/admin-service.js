@@ -1,6 +1,7 @@
 const {Admin} = require("../models")
 const AppError = require("../utils/appError")
-
+const bcrypt = require("bcryptjs")
+const {signJwt} = require("../middlewares/jwt")
 const createCeoService = async(data,next)=>{
   try {
     const{email,name,password} = data

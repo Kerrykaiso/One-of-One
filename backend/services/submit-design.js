@@ -165,7 +165,7 @@ const getAcceptedDesigns = async(next)=>{
   }
 }
 
-const listSubmission =async (id,productImages,next)=>{
+const createProductFromSubmission =async (id,productImages,next)=>{
   try {
     if (!productImages) {
       const appErr = new AppError("No image(s) provided","failed",400)
@@ -212,15 +212,16 @@ const listSubmission =async (id,productImages,next)=>{
     category: submisionData.category,
     price : submisionData.price,
     size:submisionData.size,
+    productImage: stringifyShirtImage,
     designer_id: submisionData.designerId,
     description: submisionData.description,
     color: submisionData.color
    }
 
    return createProductDetails
-   
+
   } catch (error) {
     next(error)
   }
 }
-module.exports={upload,submitDesignService,approveDesignService,getSubmissionsService,getSubmissionsById}
+module.exports={upload,submitDesignService,approveDesignService,getSubmissionsService,getSubmissionsById,createProductFromSubmission,getAcceptedDesigns}
